@@ -7,7 +7,9 @@ import (
 )
 
 func AddRoutes(superRoute *gin.RouterGroup) {
+	// register auth
+	superRoute.POST("auth", controllers.AuthHandler)
+	// register group-route
 	albumRoutes(superRoute)
 	userRoutes(superRoute)
-	superRoute.GET("auth", controllers.AuthHandler)
 }

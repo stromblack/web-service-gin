@@ -7,12 +7,16 @@ import (
 )
 
 type Config struct {
-	DBHost     string `mapstructure:"db_host"`
-	DBPort     string `mapstructure:"db_port"`
-	DBName     string `mapstructure:"db_dbname"`
-	DBUser     string `mapstructure:"db_user"`
-	DBPassword string `mapstructure:"db_password"`
-	DBSslMode  string `mapstructure:"db_sslmode"`
+	DBHost      string `mapstructure:"db_host"`
+	DBPort      string `mapstructure:"db_port"`
+	DBName      string `mapstructure:"db_dbname"`
+	DBUser      string `mapstructure:"db_user"`
+	DBPassword  string `mapstructure:"db_password"`
+	DBSslMode   string `mapstructure:"db_sslmode"`
+	Secret      string `mapstructure:"jwt_secret"`
+	Issuer      string `mapstructure:"jwt_iss"`
+	Audience    string `mapstructure:"jwt_aud"`
+	TokenExpire int    `mapstructure:"jwt_exp"`
 }
 
 func LoadConfig() (config Config, err error) {

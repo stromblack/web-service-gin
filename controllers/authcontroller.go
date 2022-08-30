@@ -12,7 +12,7 @@ import (
 func AuthHandler(c *gin.Context) {
 	var user models.User
 	if err := c.BindJSON(&user); err != nil {
-		c.IndentedJSON(http.StatusOK, models.JsonResponse{
+		c.IndentedJSON(http.StatusBadRequest, models.JsonResponse{
 			Status:  http.StatusNoContent,
 			Message: "Invalid Parameter",
 		})
@@ -21,7 +21,7 @@ func AuthHandler(c *gin.Context) {
 	// Verify that the user name and password are correct
 	userVerify := database.VerifyUser(user)
 	if userVerify {
-		tokenString, _ := authorized.GenToken(user.UserName)
+		tokenString, _ := authorized.GenToken(user.UserName, user.Email)
 		c.IndentedJSON(http.StatusOK, models.JsonResponse{
 			Status:  http.StatusOK,
 			Message: "success",

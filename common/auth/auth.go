@@ -2,24 +2,36 @@ package authorized
 
 import (
 	"errors"
+	"synergy/web-service-gin/common/config"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 )
 
-const TokenExpireDuration = time.Hour * 1
-const issuer = "web-service-gin"
+var TokenExpireDuration time.Duration
+var issuer string
+var aud string
+var MySecret []byte
 
-var MySecret = []byte("brown dog jumps over lazy fox")
+func init() {
+	config, _ := config.LoadConfig()
+	MySecret = []byte(config.Secret)
+	issuer = config.Issuer
+	aud = config.Audience
+	TokenExpireDuration = time.Hour * time.Duration(config.TokenExpire)
+}
 
 // GenToken generates JWT
-func GenToken(username string) (string, error) {
+func GenToken(username, email string) (string, error) {
 	// Create our own statement
 	c := MyClaims{
 		UserName: username,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(TokenExpireDuration).Unix(),
-			Issuer:    issuer,
+			Subject:   email,                                      // subject of token
+			IssuedAt:  time.Now().Unix(),                          // create token
+			ExpiresAt: time.Now().Add(TokenExpireDuration).Unix(), // expire token
+			Issuer:    issuer,                                     // owner token
+			Audience:  aud,                                        // who receive token
 		},
 	}
 	// Creates a signed object using the specified signing method
