@@ -2,7 +2,9 @@ package authorized
 
 import (
 	"errors"
+	"fmt"
 	"synergy/web-service-gin/common/config"
+	"synergy/web-service-gin/models"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -22,28 +24,34 @@ func init() {
 }
 
 // GenToken generates JWT
-func GenToken(username, email string) (string, error) {
-	// Create our own statement
-	c := MyClaims{
-		UserName: username,
-		StandardClaims: jwt.StandardClaims{
-			Subject:   email,                                      // subject of token
-			IssuedAt:  time.Now().Unix(),                          // create token
-			ExpiresAt: time.Now().Add(TokenExpireDuration).Unix(), // expire token
-			Issuer:    issuer,                                     // owner token
-			Audience:  aud,                                        // who receive token
+func GenToken(userinfo models.User) (string, error) {
+	// Get the token instance with the Signing method
+	token := jwt.New(jwt.GetSigningMethod("HS256"))
+	exp := time.Now().Add(TokenExpireDuration)
+	iat := time.Now()
+	// Add your claims
+	token.Claims = &MyClaims{
+		&jwt.RegisteredClaims{
+			// Set the exp and sub claims. sub is usually the unque value
+			Issuer:    issuer,
+			Audience:  []string{aud},
+			Subject:   userinfo.Email,
+			ExpiresAt: jwt.NewNumericDate(exp),
+			IssuedAt:  jwt.NewNumericDate(iat),
 		},
+		userinfo,
 	}
-	// Creates a signed object using the specified signing method
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
-	// Use the specified secret signature and obtain the complete encoded string token
+	// Sign the token with your secret key
 	return token.SignedString(MySecret)
 }
 
 // ParseToken parsing JWT
-func ParseToken(tokenString string) (*MyClaims, error) {
+func GetClaimsFromToken(tokenString string) (*MyClaims, error) {
 	// Parse token
 	token, err := jwt.ParseWithClaims(tokenString, &MyClaims{}, func(token *jwt.Token) (i interface{}, err error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
 		return MySecret, nil
 	})
 	if err != nil {

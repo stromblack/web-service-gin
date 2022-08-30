@@ -1,10 +1,12 @@
 package authorized
 
 import (
+	"synergy/web-service-gin/models"
+
 	"github.com/golang-jwt/jwt/v4"
 )
 
 type MyClaims struct {
-	UserName string `json:"username"`
-	jwt.StandardClaims
+	*jwt.RegisteredClaims
+	UserInfo models.User
 }

@@ -11,7 +11,8 @@ import (
 )
 
 func GetUser(c *gin.Context) {
-	fmt.Println("# Call GetUser")
+	username := c.MustGet("username").(string)
+	fmt.Println("# Call GetUser", username)
 	userList := database.GetUsers()
 	res := models.JsonResponse{
 		Status: http.StatusOK,
