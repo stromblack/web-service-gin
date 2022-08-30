@@ -10,10 +10,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// scenario when login send user object server will verify user object if valid send access-token & refresh-token cookie
 func AuthHandler(c *gin.Context) {
 	var user models.User
 	if err := c.BindJSON(&user); err != nil {
-		c.IndentedJSON(http.StatusBadRequest, models.JsonResponse{
+		c.IndentedJSON(http.StatusOK, models.JsonResponse{
 			Status:  2002,
 			Message: "Invalid Parameter",
 		})
@@ -23,17 +24,56 @@ func AuthHandler(c *gin.Context) {
 	userVerify := database.VerifyUser(user)
 	if userVerify {
 		tokenString, _ := authorized.GenToken(user)
-		c.IndentedJSON(http.StatusOK, models.JsonResponse{
-			Status:  http.StatusOK,
-			Message: "success",
-			Data:    tokenString,
+		refreshString, _ := authorized.RefreshToken(user)
+		c.JSON(http.StatusOK, gin.H{
+			"access_token":  tokenString,
+			"refresh_token": refreshString,
 		})
 		return
 	}
 	c.IndentedJSON(http.StatusUnauthorized, models.JsonResponse{
-		Status:  http.StatusOK,
+		Status:  http.StatusUnauthorized,
 		Message: "Authentication failed",
 	})
+}
+
+// scenario when access-token is expire handler trigeer
+// validate refresh_token from cookie & send new access-token to user
+func RefreshTokenHandler(c *gin.Context) {
+	type tokenReqBody struct {
+		RefreshToken string `json:"refresh_token"`
+		models.User
+	}
+	tokenReq := tokenReqBody{}
+	if err := c.BindJSON(tokenReq); err != nil {
+		c.IndentedJSON(http.StatusOK, models.JsonResponse{
+			Status:  2002,
+			Message: "Invalid Parameter",
+		})
+		return
+	}
+	// verify refresh_token
+	_, err := authorized.VerifyRefreshToken(tokenReq.RefreshToken)
+	if err != nil {
+		c.IndentedJSON(http.StatusUnauthorized, models.JsonResponse{
+			Status:  2005,
+			Message: "invalid Token",
+		})
+		c.Abort()
+		return
+	} else {
+		// gen-token
+		userinfo := models.User{
+			UserName: tokenReq.UserName,
+			Email:    tokenReq.Email,
+		}
+		tokenString, _ := authorized.GenToken(userinfo)
+		c.JSON(http.StatusOK, gin.H{
+			"access_token":  tokenString,
+			"refresh_token": tokenReq.RefreshToken,
+		})
+	}
+
 }
 
 // JWT authmiddleware authentication middleware based on JWT
@@ -62,7 +102,7 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 			return
 		}
 		// parts[1] is the obtained tokenString. We use the previously defined function to parse JWT to parse it
-		mc, err := authorized.GetClaimsFromToken(parts[1])
+		mc, err := authorized.VerifyToken(parts[1])
 		if err != nil {
 			c.IndentedJSON(http.StatusUnauthorized, models.JsonResponse{
 				Status:  2005,

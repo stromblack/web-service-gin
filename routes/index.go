@@ -9,6 +9,7 @@ import (
 func AddRoutes(superRoute *gin.RouterGroup) {
 	// register auth
 	superRoute.POST("auth", controllers.AuthHandler)
+	superRoute.POST("refresh", controllers.RefreshTokenHandler)
 	// register group-route
 	superRoute.Use(controllers.JWTAuthMiddleware())
 	albumRoutes(superRoute)
