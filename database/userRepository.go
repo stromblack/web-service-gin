@@ -65,3 +65,7 @@ func DeleteUser(userid int) bool {
 	common.CheckErr(err)
 	return affect > 0
 }
+
+func VerifyUser(user models.User) bool {
+	return true
+}
