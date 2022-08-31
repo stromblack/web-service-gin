@@ -25,7 +25,7 @@ func AuthHandler(c *gin.Context) {
 	if userVerify {
 		tokenString, _ := authorized.GenToken(user)
 		refreshString, _ := authorized.RefreshToken(user)
-		c.JSON(http.StatusOK, gin.H{
+		c.IndentedJSON(http.StatusOK, gin.H{
 			"access_token":  tokenString,
 			"refresh_token": refreshString,
 		})
