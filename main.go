@@ -3,6 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"os"
 	"synergy/web-service-gin/routes"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -11,32 +13,34 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var ginLamda *ginadapter.GinLambda
+var ginLambda *ginadapter.GinLambda
 
-func lambdaHandler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	fmt.Println("# lambdaHandler")
-	if ginLamda == nil {
-		ginLamda = ginadapter.New(ginEngine())
-	}
-	return ginLamda.ProxyWithContext(ctx, req)
+func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	return ginLambda.ProxyWithContext(ctx, request)
 }
-
 func ginEngine() *gin.Engine {
 	app := gin.Default()
+
+	app.GET("/hello", func(c *gin.Context) {
+		c.String(http.StatusOK, "hello gin!")
+	})
 	// create group route
-	route := app.Group("/api/v1")
+	route := app.Group("/api")
 	// add child into group route
 	routes.AddRoutes(route)
 	return app
 }
 
 func main() {
-	if gin.Mode() == "release" {
-		lambda.Start(lambdaHandler)
-		fmt.Println("# lambda.Start")
-	} else {
-		app := ginEngine()
-		app.Run("localhost:8082")
-	}
+	g := ginEngine()
+	env := os.Getenv("GIN_MODE")
+	if env == "release" {
+		fmt.Println("running aws lambda in aws")
+		ginLambda = ginadapter.New(g)
 
+		lambda.Start(Handler)
+	} else {
+		fmt.Println("running aws lambda in local")
+		g.Run(":8080")
+	}
 }

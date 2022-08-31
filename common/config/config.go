@@ -19,6 +19,33 @@ type Config struct {
 	TokenExpire int    `mapstructure:"jwt_exp"`
 }
 
+// const (
+// 	db_host     = "127.0.0.1"
+// 	db_port     = "5432"
+// 	db_user     = "postgres"
+// 	db_password = "3018"
+// 	db_dbname   = "synergy_dev"
+// 	db_sslmode  = "disable"
+// 	jwt_secret  = "brown dog jumps over lazy fox"
+// 	jwt_iss     = "web-service-gin"
+// 	jwt_aud     = "https://localhost:43000"
+// 	jwt_exp     = 1
+// )
+
+// func LoadConfig() (config Config, err error) {
+// 	return Config{
+// 		DBHost:      db_host,
+// 		DBPort:      db_port,
+// 		DBUser:      db_user,
+// 		DBPassword:  db_password,
+// 		DBSslMode:   db_sslmode,
+// 		Secret:      jwt_secret,
+// 		Issuer:      jwt_iss,
+// 		Audience:    jwt_aud,
+// 		TokenExpire: jwt_exp,
+// 	}, nil
+// }
+
 func LoadConfig() (config Config, err error) {
 	viper.SetConfigName("app")
 	viper.SetConfigType("env")
