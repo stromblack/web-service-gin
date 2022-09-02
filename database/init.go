@@ -28,5 +28,6 @@ func InitDb() (*sql.DB, error) {
 	// check error
 	common.CheckErr(err)
 	// return db.
+	fmt.Println("# Database connect.")
 	return db, err
 }

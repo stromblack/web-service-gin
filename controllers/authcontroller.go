@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	authorized "synergy/web-service-gin/common/auth"
@@ -24,7 +25,7 @@ func AuthHandler(c *gin.Context) {
 	userVerify := database.VerifyUser(user)
 	if userVerify {
 		tokenString, _ := authorized.GenToken(user)
-		refreshString, _ := authorized.RefreshToken(user)
+		refreshString, _ := authorized.RefreshToken(user.Email)
 		c.IndentedJSON(http.StatusOK, gin.H{
 			"access_token":  tokenString,
 			"refresh_token": refreshString,
@@ -41,14 +42,14 @@ func AuthHandler(c *gin.Context) {
 // validate refresh_token from cookie & send new access-token to user
 func RefreshTokenHandler(c *gin.Context) {
 	type tokenReqBody struct {
-		RefreshToken string `json:"refresh_token"`
+		RefreshToken string `json:"user_refresh"`
 		models.User
 	}
 	tokenReq := tokenReqBody{}
-	if err := c.BindJSON(tokenReq); err != nil {
+	if err := c.BindJSON(&tokenReq); err != nil {
 		c.IndentedJSON(http.StatusOK, models.JsonResponse{
 			Status:  2002,
-			Message: "Invalid Parameter",
+			Message: fmt.Sprintf("Invalid Parameter %s", err),
 		})
 		return
 	}
