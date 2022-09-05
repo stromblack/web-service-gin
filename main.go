@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"synergy/web-service-gin/dbjet"
+	dbjet "synergy/web-service-gin/database/jet"
 	"synergy/web-service-gin/routes"
 
 	"github.com/aws/aws-lambda-go/events"

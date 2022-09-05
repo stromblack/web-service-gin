@@ -36,7 +36,7 @@ func LoadConfig() (config Config, err error) {
 		log.Fatalf("error reading config file: %s", err)
 	}
 	// confirm file is used
-	log.Printf("Using config: %s\n", viper.ConfigFileUsed())
+	fmt.Printf("# Using config: %s\n", viper.ConfigFileUsed())
 	// to unnarshal values into target object
 	err = viper.Unmarshal(&config)
 	return
