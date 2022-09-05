@@ -14,4 +14,5 @@ func AddRoutes(superRoute *gin.RouterGroup) {
 	superRoute.Use(controllers.JWTAuthMiddleware())
 	albumRoutes(superRoute)
 	userRoutes(superRoute)
+	gormRoutes(superRoute)
 }

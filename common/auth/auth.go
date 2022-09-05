@@ -68,22 +68,19 @@ func VerifyToken(tokenString string) (*MyClaims, error) {
 }
 
 // GenToken generates JWT
-func RefreshToken(userinfo models.User) (string, error) {
+func RefreshToken(sub string) (string, error) {
 	// Get the token instance with the Signing method
 	token := jwt.New(jwt.GetSigningMethod("HS256"))
 	exp := time.Now().Add(RefreshTokenExpire)
 	iat := time.Now()
 	// Add your claims
-	token.Claims = &MyClaims{
-		&jwt.RegisteredClaims{
-			// Set the exp and sub claims. sub is usually the unque value
-			Issuer:    issuer,
-			Audience:  []string{aud},
-			Subject:   userinfo.Email,
-			ExpiresAt: jwt.NewNumericDate(exp),
-			IssuedAt:  jwt.NewNumericDate(iat),
-		},
-		models.User{},
+	token.Claims = &jwt.RegisteredClaims{
+		// Set the exp and sub claims. sub is usually the unque value
+		Issuer:    issuer,
+		Audience:  []string{aud},
+		Subject:   sub,
+		ExpiresAt: jwt.NewNumericDate(exp),
+		IssuedAt:  jwt.NewNumericDate(iat),
 	}
 	// Sign the token with your secret key
 	return token.SignedString(MyRefreshSecret)

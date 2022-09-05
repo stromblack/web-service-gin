@@ -9,10 +9,13 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const TABLE_NAME = "public.\"T_USER_INFO\""
+
 func GetUsers() []models.User {
 	db, _ := InitDb()
 	defer db.Close()
-	rows, err := db.Query("SELECT uid,username,password,email,created FROM T_USER_INFO")
+	query := fmt.Sprintf("SELECT * FROM %s", TABLE_NAME)
+	rows, err := db.Query(query)
 	common.CheckErr(err)
 	userList := make([]models.User, 0)
 	// loop
@@ -32,7 +35,7 @@ func InsertUser(user models.User) models.User {
 	defer db.Close()
 	var LastInsertId int
 	dt := time.Now()
-	err := db.QueryRow("INSERT INTO T_USER_INFO(username,password,email,created) VALUES($1, $2, $3, $4) RETURNING uid;", user.UserName, user.UserPassword, user.Email, dt).Scan(&LastInsertId)
+	err := db.QueryRow("INSERT INTO public.\"T_USER_INFO\"(username,password,email,created) VALUES($1, $2, $3, $4) RETURNING uid;", user.UserName, user.UserPassword, user.Email, dt).Scan(&LastInsertId)
 	common.CheckErr(err)
 	fmt.Printf("# Inserting = %v", LastInsertId)
 	user.UserID = int64(LastInsertId)
@@ -43,7 +46,7 @@ func UpdateUser(user models.User) bool {
 	db, _ := InitDb()
 	defer db.Close()
 	fmt.Println("# Updating")
-	stmt, err := db.Prepare("update T_USER_INFO set username=$1, email=$2 where uid=$3")
+	stmt, err := db.Prepare("update public.\"T_USER_INFO\" set username=$1, email=$2 where uid=$3")
 	common.CheckErr(err)
 	res, err := stmt.Exec(user.UserName, user.Email, user.UserID)
 	common.CheckErr(err)
@@ -57,7 +60,7 @@ func DeleteUser(userid int) bool {
 	db, _ := InitDb()
 	defer db.Close()
 	fmt.Println("# Deleteing")
-	stmt, err := db.Prepare("DELETE FROM T_USER_INFO WHERE uid = $1")
+	stmt, err := db.Prepare("DELETE FROM public.\"T_USER_INFO\" WHERE uid = $1")
 	common.CheckErr(err)
 	res, err := stmt.Exec(userid)
 	common.CheckErr(err)
