@@ -8,7 +8,7 @@ import (
 func CheckErr(err error) {
 	// check if on labmda log only
 	env := os.Getenv("GIN_MODE")
-	if env == "release" {
+	if env != "release" {
 		panicOnError(err)
 	} else {
 		if err != nil {

@@ -15,4 +15,5 @@ func AddRoutes(superRoute *gin.RouterGroup) {
 	albumRoutes(superRoute)
 	userRoutes(superRoute)
 	gormRoutes(superRoute)
+	jetRoutes(superRoute)
 }

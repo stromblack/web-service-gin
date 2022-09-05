@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	dbjet "synergy/web-service-gin/database/jet"
 	"synergy/web-service-gin/routes"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -24,9 +23,6 @@ func ginEngine() *gin.Engine {
 
 	app.GET("/hello", func(c *gin.Context) {
 		c.String(http.StatusOK, "hello gin!")
-	})
-	app.GET("/jet", func(ctx *gin.Context) {
-		ctx.IndentedJSON(http.StatusOK, dbjet.GetData())
 	})
 	// create group route
 	route := app.Group("/api")
