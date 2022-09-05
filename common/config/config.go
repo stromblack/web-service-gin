@@ -1,7 +1,9 @@
 package config
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/spf13/viper"
 )
@@ -17,6 +19,28 @@ type Config struct {
 	Issuer      string `mapstructure:"jwt_iss"`
 	Audience    string `mapstructure:"jwt_aud"`
 	TokenExpire int    `mapstructure:"jwt_exp"`
+}
+
+func LoadConfig() (config Config, err error) {
+	_, found := os.LookupEnv("GIN_ENV")
+	var env string = "dev"
+	if found {
+		env = os.Getenv("GIN_ENV")
+	}
+	filename := fmt.Sprintf("app-%s", env)
+	viper.SetConfigName(filename)
+	viper.SetConfigType("env")
+	viper.AddConfigPath(".")
+	// search config
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalf("error reading config file: %s", err)
+	}
+	// confirm file is used
+	log.Printf("Using config: %s\n", viper.ConfigFileUsed())
+	// to unnarshal values into target object
+	err = viper.Unmarshal(&config)
+	return
+	// loading function isc completed
 }
 
 // const (
@@ -45,19 +69,3 @@ type Config struct {
 // 		TokenExpire: jwt_exp,
 // 	}, nil
 // }
-
-func LoadConfig() (config Config, err error) {
-	viper.SetConfigName("app")
-	viper.SetConfigType("env")
-	viper.AddConfigPath(".")
-	// search config
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("error reading config file: %s", err)
-	}
-	// confirm file is used
-	log.Printf("Using config: %s\n", viper.ConfigFileUsed())
-	// to unnarshal values into target object
-	err = viper.Unmarshal(&config)
-	return
-	// loading function isc completed
-}
