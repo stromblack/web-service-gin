@@ -11,5 +11,6 @@ func jetRoutes(superroute *gin.RouterGroup) {
 	{
 		jet.GET("", controllers.JetGetData)
 		jet.POST("/contact", controllers.JetAddContactData)
+		jet.PUT("/contact", controllers.JetUpdateContactDAta)
 	}
 }
