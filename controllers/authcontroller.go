@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 	authorized "synergy/web-service-gin/common/auth"
+	statusmodel "synergy/web-service-gin/common/http"
 	"synergy/web-service-gin/database"
 	"synergy/web-service-gin/models"
 
@@ -48,8 +49,8 @@ func RefreshTokenHandler(c *gin.Context) {
 	tokenReq := tokenReqBody{}
 	if err := c.BindJSON(&tokenReq); err != nil {
 		c.IndentedJSON(http.StatusOK, models.JsonResponse{
-			Status:  2002,
-			Message: fmt.Sprintf("Invalid Parameter %s", err),
+			Status:  statusmodel.InvalidParameter,
+			Message: fmt.Sprintf("%s %s", statusmodel.InvalidParameter.String(), err),
 		})
 		return
 	}
@@ -57,8 +58,8 @@ func RefreshTokenHandler(c *gin.Context) {
 	_, err := authorized.VerifyRefreshToken(tokenReq.RefreshToken)
 	if err != nil {
 		c.IndentedJSON(http.StatusUnauthorized, models.JsonResponse{
-			Status:  2005,
-			Message: "invalid Token",
+			Status:  statusmodel.InvalidToken,
+			Message: statusmodel.InvalidToken.String(),
 		})
 		c.Abort()
 		return
@@ -86,8 +87,8 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 		authHeader := c.Request.Header.Get("Authorization")
 		if authHeader == "" {
 			c.IndentedJSON(http.StatusOK, models.JsonResponse{
-				Status:  2003,
-				Message: "Request header auth Empty",
+				Status:  statusmodel.RequestHeaderEmpty,
+				Message: statusmodel.RequestHeaderEmpty.String(),
 			})
 			c.Abort()
 			return
@@ -96,8 +97,8 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 		parts := strings.SplitN(authHeader, " ", 2)
 		if !(len(parts) == 2 && parts[0] == "Bearer") {
 			c.IndentedJSON(http.StatusOK, models.JsonResponse{
-				Status:  2004,
-				Message: "Request header auth Incorrect format",
+				Status:  statusmodel.RequestHeaderIncorrect,
+				Message: statusmodel.RequestHeaderIncorrect.String(),
 			})
 			c.Abort()
 			return
@@ -106,8 +107,8 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 		mc, err := authorized.VerifyToken(parts[1])
 		if err != nil {
 			c.IndentedJSON(http.StatusUnauthorized, models.JsonResponse{
-				Status:  2005,
-				Message: "invalid Token",
+				Status:  statusmodel.InvalidToken,
+				Message: statusmodel.InvalidToken.String(),
 			})
 			c.Abort()
 			return
