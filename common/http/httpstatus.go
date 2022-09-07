@@ -10,6 +10,7 @@ const (
 	ErrorInDatabase        StatusModel = 2006
 )
 
+// more detail implement https://www.golangprograms.com/golang/interface-type/
 // implement the String method for the StatusModel type
 func (s StatusModel) String() string {
 	switch s {
