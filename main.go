@@ -18,11 +18,29 @@ var ginLambda *ginadapter.GinLambda
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	return ginLambda.ProxyWithContext(ctx, request)
 }
+func myfunc(mychan chan string) {
+	for v := 0; v < 5; v++ {
+		// send value to channel
+		mychan <- fmt.Sprintf("my channel call %d", v+1)
+	}
+	close(mychan)
+}
 func ginEngine() *gin.Engine {
 	app := gin.Default()
 
 	app.GET("/hello", func(c *gin.Context) {
 		c.String(http.StatusOK, "hello gin!")
+	})
+	ch := make(chan string)
+	// call goroutine & send channel
+	go myfunc(ch)
+	app.GET("/channel", func(c *gin.Context) {
+		// for-range
+		// Using for loop
+		for res := range ch {
+			fmt.Println(res)
+		}
+		c.IndentedJSON(http.StatusOK, fmt.Sprintf("channel is call! %d", len(ch)))
 	})
 	// create group route
 	route := app.Group("/api")
