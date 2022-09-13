@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,7 +28,11 @@ func myfunc(mychan chan string) {
 }
 func ginEngine() *gin.Engine {
 	app := gin.Default()
-
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization", "X-Api-Key", "X-Amz-Security-Token"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	app.Use(cors.New(config))
 	app.GET("/hello", func(c *gin.Context) {
 		c.String(http.StatusOK, "hello gin!")
 	})

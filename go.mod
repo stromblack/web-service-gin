@@ -6,6 +6,7 @@ require github.com/lib/pq v1.10.6
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gin-contrib/cors v1.4.0 // indirect
 	github.com/go-jet/jet/v2 v2.8.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
