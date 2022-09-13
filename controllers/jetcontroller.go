@@ -14,6 +14,7 @@ import (
 func JetGetData(c *gin.Context) {
 	// create channel
 	ch := make(chan models.ChannelResponse)
+	// use go-function
 	go dbjet.GetData(ch)
 	// wait channel complete
 	var result models.ChannelResponse
