@@ -7,6 +7,8 @@ import (
 	"os"
 	"synergy/web-service-gin/routes"
 
+	"synergy/web-service-gin/common/config"
+
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
@@ -28,10 +30,16 @@ func myfunc(mychan chan string) {
 }
 func ginEngine() *gin.Engine {
 	app := gin.Default()
+	// load web-config
+	webconfig, _ := config.LoadConfig()
+	// set cors for gin
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"}
-	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization", "X-Api-Key", "X-Amz-Security-Token"}
-	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	config.AllowOrigins = webconfig.CorsOriginArray()
+	config.AllowHeaders = webconfig.CorsHeaderArray()
+	config.AllowMethods = webconfig.CorsMethodArray()
+	//config.AllowOrigins = []string{"*"}
+	//config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization", "X-Api-Key", "X-Amz-Security-Token"}
+	//config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	app.Use(cors.New(config))
 	app.GET("/hello", func(c *gin.Context) {
 		c.String(http.StatusOK, "hello gin!")
