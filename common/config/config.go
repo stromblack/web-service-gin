@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -19,6 +20,19 @@ type Config struct {
 	Issuer      string `mapstructure:"jwt_iss"`
 	Audience    string `mapstructure:"jwt_aud"`
 	TokenExpire int    `mapstructure:"jwt_exp"`
+	CorsOrigin  string `mapstructure:"cors_origin"`
+	CorsMethod  string `mapstructure:"cors_method"`
+	CorsHeader  string `mapstructure:"cors_header"`
+}
+
+func (c Config) CorsOriginArray() []string {
+	return strings.Split(c.CorsOrigin, ",")
+}
+func (c Config) CorsMethodArray() []string {
+	return strings.Split(c.CorsMethod, ",")
+}
+func (c Config) CorsHeaderArray() []string {
+	return strings.Split(c.CorsHeader, ",")
 }
 
 func LoadConfig() (config Config, err error) {
@@ -39,6 +53,7 @@ func LoadConfig() (config Config, err error) {
 	fmt.Printf("# Using config: %s\n", viper.ConfigFileUsed())
 	// to unnarshal values into target object
 	err = viper.Unmarshal(&config)
+	//fmt.Println(config.CorsHeaderArray(), config.CorsOriginArray())
 	return
 	// loading function isc completed
 }

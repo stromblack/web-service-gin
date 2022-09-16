@@ -1,6 +1,7 @@
 package statusmodel
 
 type StatusModel int64
+type strvalue string
 
 const (
 	InvalidParameter       StatusModel = 2002

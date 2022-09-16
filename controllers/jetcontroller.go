@@ -12,7 +12,16 @@ import (
 )
 
 func JetGetData(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, dbjet.GetData())
+	// create channel
+	ch := make(chan models.ChannelResponse)
+	// use go-function
+	go dbjet.GetData(ch)
+	// wait channel complete
+	var result models.ChannelResponse
+	for res := range ch {
+		result = res
+	}
+	c.IndentedJSON(http.StatusOK, result)
 }
 
 func JetAddContactData(c *gin.Context) {
@@ -26,12 +35,19 @@ func JetAddContactData(c *gin.Context) {
 	}
 	fmt.Printf("# JSON: %v \n", data)
 	contactDb := model.Contacts{CustomerID: &data.CustomerID, ContactName: data.ContactName, Phone: &data.Phone, Email: &data.Email}
+	// create channel
+	ch := make(chan models.ChannelResponse)
 	// insert
-	r, _ := dbjet.InsertData(contactDb)
-
+	go dbjet.InsertData(contactDb, ch)
+	// wait channal
+	var result models.ChannelResponse
+	for res := range ch {
+		result = res
+	}
 	c.IndentedJSON(http.StatusOK, models.JsonResponse{
-		Status: http.StatusOK,
-		Data:   r,
+		Status:  http.StatusOK,
+		Data:    result.Result,
+		Message: result.Error.Error(),
 	})
 }
 
@@ -44,17 +60,21 @@ func JetUpdateContactDAta(c *gin.Context) {
 		})
 	}
 	contactDb := model.Contacts{ContactID: data.ContactID, CustomerID: &data.CustomerID, ContactName: data.ContactName, Phone: &data.Phone, Email: &data.Email}
-	r, err := dbjet.UpdateData(contactDb)
-	if err != nil {
-		c.IndentedJSON(http.StatusOK, models.JsonResponse{
-			Status:  statusmodel.ErrorInDatabase,
-			Message: fmt.Sprintf("Can't save contact in database %s", err),
-		})
-	} else {
-		c.IndentedJSON(http.StatusOK, models.JsonResponse{
-			Status: http.StatusOK,
-			Data:   r,
-		})
+	// add channel & go
+	ch := make(chan models.ChannelResponse)
+	go dbjet.UpdateData(contactDb, ch)
+	// wait channel
+	for res := range ch {
+		if res.Error != nil {
+			c.IndentedJSON(http.StatusOK, models.JsonResponse{
+				Status:  statusmodel.ErrorInDatabase,
+				Message: fmt.Sprintf("Can't save contact in database %s", res.Error),
+			})
+		} else {
+			c.IndentedJSON(http.StatusOK, models.JsonResponse{
+				Status: http.StatusOK,
+				Data:   res.Result,
+			})
+		}
 	}
-
 }
